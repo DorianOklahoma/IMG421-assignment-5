@@ -1,0 +1,127 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using TMPro;
+
+public enum GameMode
+{
+    idle,
+    playing,
+    levelEnd
+}
+
+public class MissionDemolition : MonoBehaviour
+{
+    static private MissionDemolition S;
+
+    [Header("Inscribed")]
+    public TMP_Text uitLevel;
+    public TMP_Text uitShots;
+    public Vector3 castlePos;
+    public GameObject[] castles;
+    public float windRange = 5f;
+
+    [Header("Dynamic")]
+    public int level = 0;
+    public int levelMax;
+    public int shotsTaken = 0;
+    public GameObject castle;
+    public GameMode mode = GameMode.idle;
+    public string showing = "show Slingshot";
+    static public float wind = 0;
+
+    void Start()
+    {
+        S = this;
+
+        levelMax = 0;
+        shotsTaken = 0;
+        levelMax = castles.Length;
+        SetWind();
+        StartLevel();
+    }
+
+    void StartLevel()
+    {
+        if (castle != null)
+        {
+            Destroy(castle);
+        }
+        Projectile.DESTROY_PROJECTILES();
+
+        castle = Instantiate(castles[level]);
+        castle.transform.position = castlePos;
+
+        Goal.goalMet = false;
+        UpdateGUI();
+        mode = GameMode.playing;
+
+        FollowCam.SWITCH_VIEW(FollowCam.eView.both);
+    }
+
+    void UpdateGUI()
+    {
+        uitLevel.text = "Level: " + (level + 1) + " of " + levelMax;
+        uitShots.text = "Shots Taken: " + shotsTaken;
+    }
+
+    void Update()
+    {
+        UpdateGUI();
+
+        if (mode == GameMode.playing && Goal.goalMet)
+        {
+            mode = GameMode.levelEnd;
+            FollowCam.SWITCH_VIEW(FollowCam.eView.both);
+            Invoke("NextLevel", 2f);
+        }
+    }
+
+    void NextLevel()
+    {
+        level++;
+        if (level == levelMax)
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene("_Win_Scene");
+        }
+        else
+        {
+            StartLevel();
+        }
+    }
+
+    static public void SHOT_FIRED()
+    {
+        S.shotsTaken++;
+    }
+
+    static public GameObject GET_CASTLE()
+    {
+        return S.castle;
+    }
+
+    void SetWind()
+    {
+        if (GameManager.windDifficulty == 0)
+        {
+            wind = 0;
+            return;
+        }
+        else if (GameManager.windDifficulty == 1)
+        {
+            wind = Random.Range(-windRange, windRange);
+            return;
+        }
+        else if (GameManager.windDifficulty == 2)
+        {
+            wind = Random.Range(-windRange, windRange);
+            Invoke("SetWind", 3f);
+            return;
+        }
+    }
+
+    public void GiveUp()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("_Lose_Scene");
+    }
+}
