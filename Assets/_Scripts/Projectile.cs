@@ -34,6 +34,8 @@ public class Projectile : MonoBehaviour
     {
         if (rigid.isKinematic || !awake) return;
 
+        rigid.AddForce(MissionDemolition.wind * Vector3.right, ForceMode.Acceleration);
+
         Vector3 deltaV3 = transform.position - prevPos;
         deltas.Add(deltaV3.magnitude);
         prevPos = transform.position;
@@ -54,8 +56,6 @@ public class Projectile : MonoBehaviour
             awake = false;
             rigid.Sleep();
         }
-
-        rigid.AddForce(MissionDemolition.wind * Vector3.right, ForceMode.Acceleration);
     }
 
     private void OnDestroy()
