@@ -9,6 +9,12 @@ public class GameManager : MonoBehaviour
     static public int windDifficulty = 0;
     static public int ballistaDifficulty = 0;
     static public int valuablesDifficulty = 0;
+    void Start()
+    {
+        windDifficulty = 0;
+        ballistaDifficulty = 0;
+        valuablesDifficulty = 0;
+    }
     public void handleWind(int value)
     {
         windDifficulty = value;
